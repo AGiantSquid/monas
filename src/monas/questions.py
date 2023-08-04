@@ -11,7 +11,7 @@ class Question:
     """Question class"""
 
     description: str
-    default: str | Callable[[dict[str, str]], str] | None = None
+    default: str | Callable[[dict[str, str]], str] | bool | None = None
     choices: list[str] | None = None
     instruction: str | None = None
 
@@ -27,7 +27,7 @@ class Question:
         self.default = func
         return func
 
-    def ask(self, answers: dict[str, str], default: str | None = None) -> str:
+    def ask(self, answers: dict[str, str], default: str | bool | None = None) -> str:
         """Prompt user for the answer.
 
         Args:
@@ -38,6 +38,8 @@ class Question:
                 default = self.default(answers)
             else:
                 default = self.default
+        if isinstance(self.default, bool):
+            return questionary.confirm(self.description, default).ask()
         if not self.choices:
             return questionary.text(self.description, default=default).ask()
         return questionary.select(
@@ -65,6 +67,7 @@ package_questions = {
         ],
         default="pdm",
     ),
+    "src_layout": Question('use "src layout"?', default=False),
 }
 
 
@@ -95,3 +98,4 @@ class InputMetadata:
     homepage: str
     requires_python: str
     build_backend: str
+    src_layout: bool

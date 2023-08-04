@@ -132,8 +132,12 @@ class PyPackage:
             with open(path / "setup.py", "w", encoding="utf-8") as f:
                 f.write(SETUP_TEMPLATE.format(**template_args))
 
-        package_dir = path / canonicalize_name(path.name).replace("-", "_")
-        package_dir.mkdir()
+        underscore_name = canonicalize_name(path.name).replace("-", "_")
+        if inputs.src_layout:
+            package_dir = path / "src" / underscore_name
+        else:
+            package_dir = path / underscore_name
+        package_dir.mkdir(parents=True)
         package_dir.joinpath("__init__.py").touch()
         return cls(config, path)
 
